@@ -280,18 +280,19 @@ document.getElementById('gift').addEventListener('click',async()=>{
   try{await window.__startProposalMusic && window.__startProposalMusic({swell:true});}catch(e){}
 });
 
-/* Start music on first scroll (before opening the gift) */
+/* Start music only after user scrolls INSIDE the opened letter */
 let __musicArmed=false;
-function __armMusicOnScroll(){
-  if(__musicArmed) return; __musicArmed=true;
+function __armMusicOnPaperScroll(){
+  if(__musicArmed || !opened) return;
+  __musicArmed=true;
   try{ window.__startProposalMusic && window.__startProposalMusic(); }catch(e){}
-  window.removeEventListener('scroll',__armMusicOnScroll);
-  window.removeEventListener('wheel',__armMusicOnScroll);
-  window.removeEventListener('touchmove',__armMusicOnScroll);
+  window.removeEventListener('scroll',__armMusicOnPaperScroll);
+  window.removeEventListener('wheel',__armMusicOnPaperScroll);
+  window.removeEventListener('touchmove',__armMusicOnPaperScroll);
 }
-window.addEventListener('scroll',__armMusicOnScroll,{passive:true});
-window.addEventListener('wheel',__armMusicOnScroll,{passive:true});
-window.addEventListener('touchmove',__armMusicOnScroll,{passive:true});
+window.addEventListener('scroll',__armMusicOnPaperScroll,{passive:true});
+window.addEventListener('wheel',__armMusicOnPaperScroll,{passive:true});
+window.addEventListener('touchmove',__armMusicOnPaperScroll,{passive:true});
 
 function closeProposal(){
   propOverlay.classList.remove('show');
@@ -415,13 +416,12 @@ function reverseFlow(){
       setTimeout(()=>{ fly.remove(); }, 1900);
     }, 350);
 
-    // 6) After ending animation: slow audio fade, then reload after 2 seconds
+    // 6) Fade music out softly once the envelope is sealed
     setTimeout(()=>{
       try{ window.__stopProposalMusic && window.__stopProposalMusic(); }catch(e){}
-      setTimeout(()=>{ location.reload(); },2000);
     }, 2400);
 
-    // 7) Reset fallback (won't normally run because page reloads)
+    // 7) Reset everything so the user can replay if they want
     setTimeout(()=>{
       opened=false; reversing=false; finalShown=false;
       ['m1','m2','m3'].forEach(id=>document.getElementById(id).classList.remove('in'));
@@ -430,9 +430,6 @@ function reverseFlow(){
       openHint.style.display=''; openHint.style.opacity='';
       // re-arm scroll music trigger
       __musicArmed=false;
-      window.addEventListener('scroll',__armMusicOnScroll,{passive:true});
-      window.addEventListener('wheel',__armMusicOnScroll,{passive:true});
-      window.addEventListener('touchmove',__armMusicOnScroll,{passive:true});
     }, 3200);
   }, 600);
 }
