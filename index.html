@@ -410,7 +410,14 @@ function reverseFlow(){
       });
 
       // 5) Slide the in-envelope letter back inside + close the flap mid-drop
-      setTimeout(()=>{ env.classList.remove('open'); }, 1100);
+      setTimeout(()=>{
+        env.classList.remove('open');
+
+        setTimeout(()=>{
+          location.reload();
+        },1000);
+
+      }, 1100);
 
       // cleanup the flying letter
       setTimeout(()=>{ fly.remove(); }, 1900);
